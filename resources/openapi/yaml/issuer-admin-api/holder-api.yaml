@@ -1,0 +1,280 @@
+openapi: 3.0.1
+info:
+  description: This API is used to manipulate holders in an Issuer Service
+  title: Issuer Service Holder Admin API
+  version: "1"
+paths:
+  /v1alpha/participants/{participantContextId}/holders:
+    post:
+      description: Adds a new holder.
+      operationId: addHolder
+      parameters:
+      - in: path
+        name: participantContextId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HolderDto"
+      responses:
+        "201":
+          description: The holder was added successfully.
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request body was malformed, or the request could not be processed"
+        "401":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+        "409":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Can't add the holder, because a object with the same ID already\
+            \ exists"
+      tags:
+      - Issuer Service Holder Admin API
+    put:
+      description: Updates holder data.
+      operationId: updateHolder
+      parameters:
+      - in: path
+        name: participantContextId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HolderDto"
+      responses:
+        "200":
+          description: The holder was updated successfully.
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request body was malformed, or the request could not be processed"
+        "401":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+        "404":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Can't update the holder because it was not found.
+      tags:
+      - Issuer Service Holder Admin API
+  /v1alpha/participants/{participantContextId}/holders/query:
+    post:
+      description: Gets all holders for a certain query.
+      operationId: queryHolders
+      parameters:
+      - in: path
+        name: participantContextId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuerySpec"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Holder"
+          description: A list of holders metadata.
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request body was malformed, or the request could not be processed"
+        "401":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+        "404":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: The holder was not found.
+      tags:
+      - Issuer Service Holder Admin API
+  /v1alpha/participants/{participantContextId}/holders/{holderId}:
+    get:
+      description: Gets metadata for a certain holder.
+      operationId: getHolderById
+      parameters:
+      - in: path
+        name: participantContextId
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: holderId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Holder"
+          description: A list of verifiable credential metadata. Note that these are
+            not actual VerifiableCredentials.
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request body was malformed, or the request could not be processed"
+        "401":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+        "404":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: The holder was not found.
+      tags:
+      - Issuer Service Holder Admin API
+components:
+  schemas:
+    ApiErrorDetail:
+      type: object
+      properties:
+        invalidValue:
+          type: object
+        message:
+          type: string
+        path:
+          type: string
+        type:
+          type: string
+    Criterion:
+      type: object
+      properties:
+        operandLeft:
+          type: object
+        operandRight:
+          type: object
+        operator:
+          type: string
+    Holder:
+      type: object
+      properties:
+        anonymous:
+          type: boolean
+        createdAt:
+          type: integer
+          format: int64
+        did:
+          type: string
+        holderId:
+          type: string
+        holderName:
+          type: string
+        id:
+          type: string
+        lastModifiedAt:
+          type: integer
+          format: int64
+        participantContextId:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: object
+    HolderDto:
+      type: object
+      properties:
+        did:
+          type: string
+        holderId:
+          type: string
+        name:
+          type: string
+        properties:
+          type: object
+          additionalProperties:
+            type: object
+      required:
+      - did
+      - holderId
+    QuerySpec:
+      type: object
+      properties:
+        filterExpression:
+          type: array
+          items:
+            $ref: "#/components/schemas/Criterion"
+        limit:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int32
+        sortField:
+          type: string
+        sortOrder:
+          type: string
+          enum:
+          - ASC
+          - DESC

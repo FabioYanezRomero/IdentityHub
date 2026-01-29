@@ -1,0 +1,147 @@
+openapi: 3.0.1
+info:
+  description: This represents the Storage API as per DCP specification. It serves
+    endpoints to write VerifiableCredentials into storage.
+  title: Storage API
+  version: "1"
+paths:
+  /v1/participants/{participantContextId}/credentials:
+    post:
+      description: Writes a set of credentials into storage
+      operationId: storeCredential
+      parameters:
+      - in: path
+        name: participantContextId
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CredentialMessage"
+      responses:
+        "200":
+          description: The credentialMessage was successfully processed and stored
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: Request body was malformed
+        "401":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: No Authorization header was given.
+        "403":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "The given authentication token could not be validated. This\
+            \ can happen, when the request body calls for a broader credentialMessage\
+            \ scope than the granted scope in the auth token"
+      tags:
+      - Storage API
+components:
+  schemas:
+    ApiErrorDetail:
+      type: object
+      example:
+        message: error message
+        type: ErrorType
+        path: object.error.path
+        invalidValue: this value is not valid
+      properties:
+        invalidValue:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        type:
+          type: string
+    CredentialContainerSchema:
+      type: object
+      example:
+        credentialType: MembershipCredential
+        payload: ""
+        format: jwt
+    CredentialMessage:
+      type: object
+      example:
+        '@context':
+        - https://w3id.org/dspace-dcp/v1.0/dcp.jsonld
+        type: CredentialMessage
+        credentials:
+        - credentialType: MembershipCredential
+          payload: ""
+          format: jwt
+        - credentialType: OrganizationCredential
+          payload: ""
+          format: json-ld
+        requestId: requestId
+      properties:
+        '@context':
+          type: object
+        '@type':
+          type: string
+        credentials:
+          type: array
+          items:
+            $ref: "#/components/schemas/CredentialContainerSchema"
+        requestId:
+          type: string
+      required:
+      - '@context'
+      - '@type'
+      - credentials
+      - requestId
+    JsonObject:
+      type: object
+      additionalProperties:
+        $ref: "#/components/schemas/JsonValue"
+      properties:
+        empty:
+          type: boolean
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"
+    JsonValue:
+      type: object
+      properties:
+        valueType:
+          type: string
+          enum:
+          - ARRAY
+          - OBJECT
+          - STRING
+          - NUMBER
+          - "TRUE"
+          - "FALSE"
+          - "NULL"
+  securitySchemes:
+    Authentication:
+      bearerFormat: JWT
+      description: Self-Issued ID token containing an access_token
+      scheme: bearer
+      type: http

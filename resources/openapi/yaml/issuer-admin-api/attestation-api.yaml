@@ -1,0 +1,221 @@
+openapi: 3.0.1
+info:
+  description: This API is used to manipulate attestations for holders in an Issuer
+    Service
+  title: Issuer Service Attestation Admin API
+  version: "1"
+paths:
+  /v1alpha/participants/{participantContextId}/attestations:
+    post:
+      description: Creates an attestation definition in the runtime.
+      operationId: createAttestation
+      parameters:
+      - in: path
+        name: participantContextId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttestationDefinitionRequest"
+      responses:
+        "201":
+          description: The attestation definition was added successfully.
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request body was malformed, or the request could not be processed"
+        "401":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+        "404":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: The holder was not found.
+        "409":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Can't add the holder, because a object with the same ID already\
+            \ exists"
+      tags:
+      - Issuer Service Attestation Admin API
+  /v1alpha/participants/{participantContextId}/attestations/query:
+    post:
+      description: Query attestation definitions
+      operationId: queryAttestations
+      parameters:
+      - in: path
+        name: participantContextId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuerySpec"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AttestationDefinition"
+          description: A list of attestation metadata.
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request body was malformed, or the request could not be processed"
+        "401":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+      tags:
+      - Issuer Service Attestation Admin API
+  /v1alpha/participants/{participantContextId}/attestations/{attestationDefinitionId}:
+    delete:
+      description: Deletes an attestation definition.
+      operationId: deleteAttestation
+      parameters:
+      - in: path
+        name: participantContextId
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: attestationDefinitionId
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: The attestation was successfully deleted.
+        "400":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "Request body was malformed, or the request could not be processed"
+        "401":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: "The request could not be completed, because either the authentication\
+            \ was missing or was not valid."
+        "404":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiErrorDetail"
+          description: The attestation or the participant was not found.
+      tags:
+      - Issuer Service Attestation Admin API
+components:
+  schemas:
+    ApiErrorDetail:
+      type: object
+      properties:
+        invalidValue:
+          type: object
+        message:
+          type: string
+        path:
+          type: string
+        type:
+          type: string
+    AttestationDefinition:
+      type: object
+      properties:
+        attestationType:
+          type: string
+        configuration:
+          type: object
+          additionalProperties:
+            type: object
+        createdAt:
+          type: integer
+          format: int64
+        id:
+          type: string
+        lastModifiedAt:
+          type: integer
+          format: int64
+        participantContextId:
+          type: string
+    AttestationDefinitionRequest:
+      type: object
+      properties:
+        attestationType:
+          type: string
+        configuration:
+          type: object
+          additionalProperties:
+            type: object
+        id:
+          type: string
+    Criterion:
+      type: object
+      properties:
+        operandLeft:
+          type: object
+        operandRight:
+          type: object
+        operator:
+          type: string
+    QuerySpec:
+      type: object
+      properties:
+        filterExpression:
+          type: array
+          items:
+            $ref: "#/components/schemas/Criterion"
+        limit:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int32
+        sortField:
+          type: string
+        sortOrder:
+          type: string
+          enum:
+          - ASC
+          - DESC
